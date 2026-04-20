@@ -1248,15 +1248,32 @@ machine.deepsleep()
 # Code resumes here after button press
 print("Woke up by button!")
 ```
-so a simple flow is : 
+so a simple flow in C is : 
 
 ```
-TO BE DONE
-setup ()
 
-void ()
+void setup () {
+
+# Do what needs to be done. Set wake-up source. Prep for sleep. Enable sleep
+}
+void loop ()  # This will not be used then
 
 ```
+
+so basically TAKE THIS FOR DEEP SLEEP
+
+```
+void setup () {
+
+esp_sleep_enable_timer_wakeup (1000000);
+
+esp_deep_sleep_start();
+}
+
+void loop () 
+
+```
+
 
 
 ---
