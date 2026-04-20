@@ -124,6 +124,16 @@ A Pico is a **microcontroller board**:
 - On the physical board there are **physical pin positions**—don’t confuse these with GPIO numbers.
 - **Tip:** Keep a printed Pico pinout at the bench.
 
+1.4 ESP32 vs. RP2040 (Pico) — Key Differences
+If you are switching from Pico to ESP32 (or using both), note these critical differences:
+
+Architecture: ESP32 is dual-core (can run two tasks simultaneously); Pico is single-core (though it has PIO for offloading).
+Connectivity: ESP32 has built-in Wi-Fi & Bluetooth. Pico requires the "W" variant for Wi-Fi and has no native BT.
+Voltage: Both are 3.3V logic. Warning: Some ESP32 GPIOs are 5V tolerant (check specific model), but Pico GPIOs are NOT 5V tolerant.
+Pin Flexibility: ESP32 pins are highly multiplexed (any pin can often be I2C, SPI, or UART). Pico pins are more rigidly assigned to specific peripherals.
+Power Management: ESP32 has a dedicated Deep Sleep mode (ultra-low power, wakes on timer/GPIO). Pico has a "sleep" mode but it behaves differently and consumes more power than ESP32 deep sleep.
+
+
 ---
 
 ## 2. Safety + Power (Don’t Fry Stuff)
@@ -1186,12 +1196,68 @@ while True:
 
 ---
 
-## 18. Offline Links to Save
+19. ESP32 Deep Sleep & Power Management
+The ESP32 excels at battery-powered projects thanks to Deep Sleep. In this mode, the main CPU and most peripherals are powered down, consuming only ~10µA.
 
-- MicroPython Pico download page: `https://micropython.org/download/RPI_PICO/`
-- Time API example: `http://worldtimeapi.org/api/ip`
-- USGS earthquakes feed: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson`
-- Cat fact API: `https://catfact.ninja/fact`
+Wake-Up Sources
+You can wake the ESP32 via:
+
+Timer: Wake after 
+X
+ seconds.
+GPIO: Wake when a specific pin changes state (e.g., button press).
+Touch Sensors: Wake when a capacitive touch threshold is crossed.
+
+```
+import machine
+import time
+
+# Configure Deep Sleep
+# Wake up after 10 seconds (10,000,000 microseconds)
+machine.deepsleep(10000000)
+
+# Code below only runs AFTER waking up
+print("ESP32 woke up!")
+
+# Do your work here (read sensor, send data)
+# ...
+
+# Enter deep sleep again at the end of the script
+machine.deepsleep(10000000)
+```
+
+```
+import machine
+import time
+
+# Define the wake-up pin (e.g., GPIO 0)
+# Note: GPIO 0 is often used for boot flashing, check your board!
+wake_pin = machine.Pin(0, machine.Pin.IN)
+
+# Configure wake-up: wake when pin goes HIGH (1)
+# Options: machine.Pin.IRQ_RISING, machine.Pin.IRQ_FALLING
+wake_pin.irq(trigger=machine.Pin.IRQ_RISING, handler=lambda p: None)
+
+# Enable wake-up source
+machine.enable_irq(wake_pin)
+
+# Enter deep sleep
+print("Going to sleep...")
+machine.deepsleep()
+
+# Code resumes here after button press
+print("Woke up by button!")
+```
+so a simple flow is : 
+
+```
+TO BE DONE
+setup ()
+
+void ()
+
+```
+
 
 ---
 
